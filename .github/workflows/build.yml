@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Install build prerequisites
         run: |
+          # bullseye is EOL: its packages now live on archive.debian.org
+          echo "deb http://archive.debian.org/debian bullseye main" > /etc/apt/sources.list
+          echo "deb http://archive.debian.org/debian-security bullseye-security main" >> /etc/apt/sources.list
+          rm -f /etc/apt/sources.list.d/*
+          echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99archive
           apt-get -qq update
           apt-get -qqy install build-essential libmpfr-dev libmpc-dev libgmp-dev \
             libpng-dev curl git cmake texinfo xz-utils bzip2 ca-certificates
