@@ -38,4 +38,15 @@ static inline void filledCircle(int cx, int cy, int r, color_t c) {
 				plot(cx + x, cy + y, c);
 }
 
+/* The SDK's libfxcg.a only has an LTO build of VRAM_CopySprite, which we can't link
+ * without -flto, so provide our own (macro placed after the header's declaration). */
+static inline void cg50_copy_sprite(const void* data, int x, int y, int w, int h) {
+	const color_t* d = (const color_t*)data;
+	int i, j;
+	for (j = 0; j < h; j++)
+		for (i = 0; i < w; i++)
+			plot(x + i, y + j, d[j * w + i]);
+}
+#define VRAM_CopySprite cg50_copy_sprite
+
 #endif

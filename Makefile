@@ -31,7 +31,7 @@ INCLUDES	:=
 
 MKG3AFLAGS := -i uns:../unselected.bmp -i sel:../selected.bmp -n basic:"Chess" -w version:"01.01.0000"
 
-CFLAGS	= -Os -Wall $(MACHDEP) $(INCLUDE)
+CFLAGS	= -Os -Wall -ffunction-sections -fdata-sections $(MACHDEP) $(INCLUDE)
 CXXFLAGS	=	$(CFLAGS)
 
 LDFLAGS	= $(MACHDEP) -T$(FXCGSDK)/toolchain/prizm.x -Wl,-static -Wl,-gc-sections

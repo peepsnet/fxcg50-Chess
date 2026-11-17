@@ -41,17 +41,11 @@
 #define py(y) (tabla_y+1+24*(y))
 
 
-/* fx-CG50 compatibility patch:
- * - push VRAM to the display explicitly before every GetKey()
- * - replace SaveVRAM_1/LoadVRAM_1 (old Prizm syscalls) with our own buffer */
-#define CG50_VRAM_BYTES (384*216*2)
-static unsigned char cg50_vram_backup[CG50_VRAM_BYTES];
-static void cg50_save_vram(void){ memcpy(cg50_vram_backup, GetVRAMAddress(), CG50_VRAM_BYTES); }
-static void cg50_load_vram(void){ memcpy(GetVRAMAddress(), cg50_vram_backup, CG50_VRAM_BYTES); }
-#define SaveVRAM_1() cg50_save_vram()
-#define LoadVRAM_1() cg50_load_vram()
+/* fx-CG50 compatibility patch: push VRAM to the display explicitly before every GetKey() */
 #define GetKey(k) (Bdisp_PutDisp_DD(), GetKey(k))
 
+/* no vsnprintf in this SDK's libc; the bformat family is not used by the game */
+#define BSTRLIB_NOVSNP
 #include "bstring/bstrlib.c"
 #include "engine.h"
 #include "babuk.h"
