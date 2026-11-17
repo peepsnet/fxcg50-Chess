@@ -64,7 +64,7 @@ jobs:
         run: |
           set -e
           cd /tmp
-          git clone --depth 1 https://github.com/tari/mkg3a.git
+          git clone --depth 1 --branch 0.5.0 https://github.com/tari/mkg3a.git
           cmake -S mkg3a -B mkg3a/build -DCMAKE_INSTALL_PREFIX=/opt/mkg3a
           cmake --build mkg3a/build -j"$(nproc)"
           cmake --install mkg3a/build
