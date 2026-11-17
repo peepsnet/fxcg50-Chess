@@ -1,0 +1,88 @@
+name: Build fx-CG50 add-in
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Debian bullseye matches the toolchain recipe used by libfxcg (gcc 10.1 / binutils 2.34).
+    container: debian:bullseye
+    steps:
+      - name: Install build prerequisites
+        run: |
+          apt-get -qq update
+          apt-get -qqy install build-essential libmpfr-dev libmpc-dev libgmp-dev \
+            libpng-dev curl git cmake texinfo xz-utils bzip2 ca-certificates
+
+      - uses: actions/checkout@v4
+
+      - name: Restore cached sh3eb-elf toolchain
+        id: toolchain-cache
+        uses: actions/cache@v4
+        with:
+          path: /opt/sh3eb
+          key: sh3eb-elf-binutils-2.34-gcc-10.1.0-v1
+
+      - name: Build sh3eb-elf cross compiler (slow, first run only)
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        run: |
+          set -e
+          cd /tmp
+          curl -fsSL https://ftpmirror.gnu.org/binutils/binutils-2.34.tar.bz2 | tar xj
+          mkdir build-binutils && cd build-binutils
+          ../binutils-2.34/configure --target=sh3eb-elf --prefix=/opt/sh3eb --disable-nls --with-sysroot
+          make -j"$(nproc)" && make install
+          cd /tmp
+          curl -fsSL https://ftpmirror.gnu.org/gcc/gcc-10.1.0/gcc-10.1.0.tar.xz | tar xJ
+          mkdir build-gcc && cd build-gcc
+          PATH=/opt/sh3eb/bin:$PATH ../gcc-10.1.0/configure --target=sh3eb-elf --prefix=/opt/sh3eb \
+            --with-pkgversion=PrizmSDK --without-headers --enable-languages=c,c++ \
+            --disable-tls --disable-nls --disable-threads --disable-shared \
+            --disable-libssp --disable-libvtv --disable-libada \
+            --with-endian=big --with-multilib-list=
+          PATH=/opt/sh3eb/bin:$PATH make -j"$(nproc)" inhibit_libc=true all-gcc
+          PATH=/opt/sh3eb/bin:$PATH make install-gcc
+          PATH=/opt/sh3eb/bin:$PATH make -j"$(nproc)" inhibit_libc=true all-target-libgcc
+          PATH=/opt/sh3eb/bin:$PATH make install-target-libgcc
+
+      - name: Restore cached mkg3a
+        id: mkg3a-cache
+        uses: actions/cache@v4
+        with:
+          path: /opt/mkg3a
+          key: mkg3a-v1
+
+      - name: Build mkg3a (g3a packager)
+        if: steps.mkg3a-cache.outputs.cache-hit != 'true'
+        run: |
+          set -e
+          cd /tmp
+          git clone --depth 1 https://github.com/tari/mkg3a.git
+          cmake -S mkg3a -B mkg3a/build -DCMAKE_INSTALL_PREFIX=/opt/mkg3a
+          cmake --build mkg3a/build -j"$(nproc)"
+          cmake --install mkg3a/build
+
+      - name: Fetch PrizmSDK headers and libraries
+        run: |
+          git clone --depth 1 https://github.com/tswilliamson/PrizmSDK.git ../PrizmSDK
+          ls ../PrizmSDK/lib ../PrizmSDK/toolchain
+
+      - name: Build
+        run: |
+          export PATH=/opt/sh3eb/bin:/opt/mkg3a/bin:$PATH
+          export FXCGSDK="$(cd .. && pwd)/PrizmSDK"
+          sh3eb-elf-gcc --version | head -1
+          make
+
+      - name: Collect output
+        run: |
+          mkdir -p dist
+          cp ./*.g3a dist/
+          ls -l dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fxcg50-chess-g3a
+          path: dist/*.g3a

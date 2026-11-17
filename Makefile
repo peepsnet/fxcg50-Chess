@@ -7,10 +7,10 @@
 # to use a system environment var in the future.
 #---------------------------------------------------------------------------------
 ifeq ($(strip $(FXCGSDK)),)
-export FXCGSDK := $(abspath ../../)
+export FXCGSDK := $(abspath ../PrizmSDK)
 endif
 
-include $(FXCGSDK)/common/prizm_rules
+include $(FXCGSDK)/toolchain/prizm_rules
 
 
 #---------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ MKG3AFLAGS := -i uns:../unselected.bmp -i sel:../selected.bmp -n basic:"Chess" -
 CFLAGS	= -Os -Wall $(MACHDEP) $(INCLUDE)
 CXXFLAGS	=	$(CFLAGS)
 
-LDFLAGS	= $(MACHDEP) -T$(FXCGSDK)/common/prizm.ld -Wl,-static -Wl,-gc-sections
+LDFLAGS	= $(MACHDEP) -T$(FXCGSDK)/toolchain/prizm.x -Wl,-static -Wl,-gc-sections
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
