@@ -332,7 +332,7 @@ bool pattvane(byte cp, mezo tabla[8][8]){
 	byte ell = 1-cp;
 	byte babu_count[2][7];
 	// = {0, 0, 0, 0, 0, 0, 0};//melyik bábuból hány darabja van a játékosnak
-	for(x=0;x<8;x++){babu_count[0][x]=0; babu_count[1][x]=0;}
+	for(x=0;x<7;x++){babu_count[0][x]=0; babu_count[1][x]=0;}
 	
 	for(x=0;x<8;x++){
 	for(y=0;y<8;y++){
