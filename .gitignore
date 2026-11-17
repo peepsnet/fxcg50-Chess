@@ -1,0 +1,12 @@
+/*.png
+*.bmp
+*.jpg
+!selected.bmp
+!unselected.bmp
+*.zip
+*.bin
+*.g3a
+/build/*
+/up/*
+/help/*
+*.run
