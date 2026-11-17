@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -105,3 +108,21 @@ jobs:
         with:
           name: fxcg50-chess-g3a
           path: dist/*.g3a
+
+      - name: Publish GitHub release (only when a v* tag is pushed)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          TAG="$GITHUB_REF_NAME"
+          BODY="Chess for the Casio fx-CG50 (port of balping's chess-prism, GPLv3; source in this repository). Copy fxcg50-Chess.g3a to the calculator over USB and run it from the Main Menu."
+          rel=$(curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases" \
+            -d "{\"tag_name\":\"$TAG\",\"name\":\"fxcg50-Chess $TAG\",\"body\":\"$BODY\"}")
+          id=$(echo "$rel" | grep -m1 '"id":' | tr -dc '0-9')
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/octet-stream" \
+            --data-binary @dist/fxcg50-Chess.g3a \
+            "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$id/assets?name=fxcg50-Chess.g3a"
