@@ -25,7 +25,7 @@ jobs:
 
       - name: Restore cached sh3eb-elf toolchain
         id: toolchain-cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: /opt/sh3eb
           key: sh3eb-elf-binutils-2.34-gcc-10.1.0-v1
@@ -52,9 +52,16 @@ jobs:
           PATH=/opt/sh3eb/bin:$PATH make -j"$(nproc)" inhibit_libc=true all-target-libgcc
           PATH=/opt/sh3eb/bin:$PATH make install-target-libgcc
 
+      - name: Save toolchain cache right away (so later failures don't lose it)
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /opt/sh3eb
+          key: sh3eb-elf-binutils-2.34-gcc-10.1.0-v1
+
       - name: Restore cached mkg3a
         id: mkg3a-cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: /opt/mkg3a
           key: mkg3a-v1
@@ -68,6 +75,13 @@ jobs:
           cmake -S mkg3a -B mkg3a/build -DCMAKE_INSTALL_PREFIX=/opt/mkg3a
           cmake --build mkg3a/build -j"$(nproc)"
           cmake --install mkg3a/build
+
+      - name: Save mkg3a cache
+        if: steps.mkg3a-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /opt/mkg3a
+          key: mkg3a-v1
 
       - name: Fetch PrizmSDK headers and libraries
         run: |

@@ -16,7 +16,6 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <MCS_syscalls.h>
 #include "hash.h"
 
 unsigned char dir[] = "@CHESS";
@@ -57,8 +56,8 @@ void save_settings(){
 	*p = settings.forgatas.dinamikus.soros_babu; p++;
 	*p = settings.forgatas.dinamikus.ellen_babu; p++;
 	
-	__uint32_t hash = SuperFastHash(buffer+4, (int)szukseges_size-4);
-	memcpy(buffer, &hash, sizeof(__uint32_t));
+	hash_u32 hash = SuperFastHash(buffer+4, (int)szukseges_size-4);
+	memcpy(buffer, &hash, sizeof(hash_u32));
 	encode(buffer, szukseges_size);
 
 	if(MCSGetDlen2(dir, file_settings, &size) != 0){
@@ -85,9 +84,9 @@ void load_settings(){
 			MCSGetData1(0, szukseges_size, (void*)buffer);
 			encode(buffer, szukseges_size);
 			
-			__uint32_t hash = SuperFastHash(buffer+4, (int)szukseges_size-sizeof(__uint32_t));
-			__uint32_t hash2;
-			memcpy(&hash2, buffer, sizeof(__uint32_t));
+			hash_u32 hash = SuperFastHash(buffer+4, (int)szukseges_size-sizeof(hash_u32));
+			hash_u32 hash2;
+			memcpy(&hash2, buffer, sizeof(hash_u32));
 			if(hash==hash2){
 				settings.forgatas.mod = buffer[7];
 				settings.forgatas.statikus.feher_terfel = buffer[8];
@@ -125,8 +124,8 @@ void save_game(){
 	*p++;
 	
 	
-	__uint32_t hash = SuperFastHash(buffer+4, (int)szukseges_size-sizeof(__uint32_t));
-	memcpy(buffer, &hash, sizeof(__uint32_t));
+	hash_u32 hash = SuperFastHash(buffer+4, (int)szukseges_size-sizeof(hash_u32));
+	memcpy(buffer, &hash, sizeof(hash_u32));
 	encode(buffer, szukseges_size);
 
 	if(MCSGetDlen2(dir, file_settings, &size) != 0){
@@ -155,8 +154,8 @@ void load_game(){
 			unsigned short msize;
 			memcpy(&msize, buffer+4, 2);
 			if(buffer[6]==VERSION && size>=msize){
-				__uint32_t hash = SuperFastHash(buffer+4, (int)msize-4);
-				__uint32_t hash2;
+				hash_u32 hash = SuperFastHash(buffer+4, (int)msize-4);
+				hash_u32 hash2;
 				memcpy(&hash2, buffer, 4);
 				if(hash==hash2){
 					unsigned char *p = buffer+fejlec_hossz;

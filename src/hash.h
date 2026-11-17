@@ -1,9 +1,10 @@
-#include <machine/_default_types.h>
+typedef unsigned short hash_u16;
+typedef unsigned int hash_u32;
 
-#define get16bits(d) (*((const __uint16_t *) (d)))
+#define get16bits(d) (*((const hash_u16 *) (d)))
 
-__uint32_t SuperFastHash (const char * data, int len) {
-	__uint32_t hash = len, tmp;
+hash_u32 SuperFastHash (const char * data, int len) {
+	hash_u32 hash = len, tmp;
 	int rem;
 
 	if (len <= 0 || data == NULL) return 0;
@@ -16,7 +17,7 @@ __uint32_t SuperFastHash (const char * data, int len) {
 		hash  += get16bits (data);
 		tmp    = (get16bits (data+2) << 11) ^ hash;
 		hash   = (hash << 16) ^ tmp;
-		data  += 2*sizeof (__uint16_t);
+		data  += 2*sizeof (hash_u16);
 		hash  += hash >> 11;
 	}
 
@@ -24,7 +25,7 @@ __uint32_t SuperFastHash (const char * data, int len) {
 	switch (rem) {
 		case 3: hash += get16bits (data);
 			hash ^= hash << 16;
-			hash ^= ((signed char)data[sizeof (__uint16_t)]) << 18;
+			hash ^= ((signed char)data[sizeof (hash_u16)]) << 18;
 			hash += hash >> 11;
 			break;
 		case 2: hash += get16bits (data);

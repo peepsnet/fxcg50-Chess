@@ -16,16 +16,18 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fxcg/display.h>
-#include <color.h>
-#include <display_syscalls.h>
-#include <disp_tools.hpp>
-#include <keyboard.h>
-#include <keyboard.hpp>
+#include <stddef.h>
 #include <string.h>
-#include <sprite.h>
 #include <stdlib.h>
-#include <fxcg.h>
+#include <fxcg/app.h>
+#include <fxcg/display.h>
+#include <fxcg/file.h>
+#include <fxcg/heap.h>
+#include <fxcg/keyboard.h>
+#include <fxcg/misc.h>
+#include <fxcg/rtc.h>
+#include <fxcg/system.h>
+#include "compat.h"
 
 #define VERSION 102
 
@@ -53,6 +55,10 @@ static void cg50_load_vram(void){ memcpy(GetVRAMAddress(), cg50_vram_backup, CG5
 #include "bstring/bstrlib.c"
 #include "engine.h"
 #include "babuk.h"
+/* forward declarations (originally relied on implicit declarations) */
+void keret(int x0, int y0, int width, int height);
+void print_mezo(const unsigned short* data, unsigned short szin, irany allas, int x0, int y0);
+void save_settings(void);
 #include "setup.h"
 #include "display.h"
 bool playing = true;
@@ -92,11 +98,11 @@ bstring b = bfromcstr ("Hello");
 	
 	int result;
 	GetFKeyPtr( 0x0186, &result );//NEW
-	FKey_Display( 3, result );
+	FKey_Display( 3, (void*)result );
 	GetFKeyPtr( 0x03E4, &result );//SETUP
-	FKey_Display( 4, result );
+	FKey_Display( 4, (void*)result );
 	GetFKeyPtr( 0x03FD, &result );//HELP
-	FKey_Display( 5, result );
+	FKey_Display( 5, (void*)result );
 	
 	graf_opt();
 	

@@ -36,7 +36,7 @@ unsigned short opacity(unsigned short old, unsigned short ag){
 	return re;
 }
 
-void print_mezo(unsigned short* data, unsigned short szin, irany allas, int x0, int y0){
+void print_mezo(const unsigned short* data, unsigned short szin, irany allas, int x0, int y0){
 	unsigned short uj[21][21];
 	byte x, y;
 	for(x=0;x<21;x++){

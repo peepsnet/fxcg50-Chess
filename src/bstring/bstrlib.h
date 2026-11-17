@@ -37,7 +37,7 @@ extern "C" {
 typedef struct tagbstring * bstring;
 typedef const struct tagbstring * const_bstring;
 
-#define memset sys_memset
+
 
 /* Copy functions */
 #define cstr2bstr bfromcstr
